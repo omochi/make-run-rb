@@ -1,0 +1,27 @@
+#!/bin/bash
+set -ue
+cat << EOT > run.rb
+#!/usr/bin/ruby
+require "shellwords"
+
+def system(args)
+    cmd = args.shelljoin
+    if RUBY_VERSION.to_f >= 2.6
+        Kernel.system(cmd, exception: true)
+    else
+        Kernel.system(cmd)
+        st = \$?
+        if not st.success?
+            raise "exit status: #{st}"
+        end
+    end
+end
+
+args = [
+    "swift",
+    "a.swift"
+]
+
+system(args)
+EOT
+chmod +x run.rb
